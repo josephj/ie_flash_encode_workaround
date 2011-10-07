@@ -1,0 +1,11 @@
+<script>
+var getValue = function (name, url) {
+    name = name.replace(/[\[]/, '[');
+    name = name.replace(/[\]]/, ']');
+    var regEx = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    return (!regEx.exec(url)) ? '' : regEx.exec(url)[1];
+}
+url = getValue("url", location.href);
+location.href = decodeURIComponent(url);
+</script>
+<meta http-equiv="refresh" content="0;url=http://www.new-url.com/" />

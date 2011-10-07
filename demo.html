@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SoundManager2 can't play M4A file with multibyte URLs in IE.</title>
+<link rel="stylesheet" href="http://yui.yahooapis.com/3.3.0/build/cssreset/reset-min.css">
+<link rel="stylesheet" href="http://yui.yahooapis.com/3.3.0/build/cssfonts/fonts-min.css">
+<link rel="stylesheet" href="/prototype.css">
+<style>h5 {margin-bottom: 3px;}
+#soundmanager-debug {
+    margin: 10px;
+    padding: 5px;
+    border: solid 1px #ccc;
+    border-radius: 4px;
+    background-color: #eee;
+    font-size: 10px;
+    font-family: Verdana;
+}
+</style>
+<script src="script/soundmanager2.js"></script>
+<script>
+soundManager.url              = "swf/soundmanager2_flash_xdomain/";
+soundManager.flashLoadTimeout = 5000;
+soundManager.flashVersion     = 9;
+soundManager.useFlashBlock    = false;
+soundManager.useHTML5Audio    = true;
+soundManager.useMovieStar     = true;
+</script>
+<script src="http://yui.yahooapis.com/3.4.1/build/yui/yui-min.js"></script>
+</head>
+<body>
+
+    <h1>SoundManager2 can't play M4A file with multibyte URLs in IE.</h1>
+
+    <h2>URL that IE CAN play.</h2>
+    <a href="http://josephj.com/lab/2011/soundmanager2/audio/04 CH.m4a" class="play-link">http://josephj.com/lab/2011/soundmanager2/audio/04 CH.m4a</a> (Click to play)<br>
+    <ul>
+        <li><h5>Before encodeURI():</h5> http://josephj.com/lab/2011/soundmanager2/audio/<em>04 CH.m4a</em></li>
+        <li><h5>After encodeURI() for SM2:</h5> http://josephj.com/lab/2011/soundmanager2/audio/<em>04%20CH.m4a</em></li>
+    </ul>
+
+    <h2>URL that IE CAN'T play.</h2>
+    <a href="http://josephj.com/lab/2011/soundmanager2/audio/04 中文.m4a" class="play-link">http://josephj.com/lab/2011/soundmanager2/audio/04 中文.m4a</a> (Click to play, but IE fails.) 
+    <ul>
+        <li><h5>Before encodeURI():</h5> http://josephj.com/lab/2011/soundmanager2/audio/<em>04 中文.m4a</em></li>
+        <li><h5>After encodeURI() for SM2:</h5> http://josephj.com/lab/2011/soundmanager2/audio/<em>04%20%E4%B8%AD%E6%96%87.m4a</em></li>
+        <li><h5>Actual Request by sniffering from Fiddler (<em>IE Ony</em>):</h5> http://josephj.com/lab/2011/soundmanager2/audio/<em>04%20%A4%A4%A4%E5.m4a</em></li>
+    </ul>
+    <p>Only IE uses Big5 for encoding, other browsers use UTF-8.</p>
+    <p>My Window Vista IE8 uses UTF-8 too. :p</p>
+
+    <hr>
+    <h3>Logging</h3>
+
+    <script>
+    YUI().use("event-base", "node-base", function (Y) {
+        Y.all(".play-link").on("click", function (e) {
+            e.preventDefault();
+            linkEl = e.currentTarget;
+            var url,
+                sound;
+            soundManager.stopAll();
+            url = linkEl.get("innerHTML");
+            if (Y.UA.ie) {
+                url = "http://josephj.com/lab/2011/soundmanager2/proxy.php?url=" + encodeURIComponent(url);
+            } else {
+                url = encodeURI(url);
+            }
+            sound = soundManager.createSound({
+                "id"            : "music_" + parseInt(new Date().getTime(), 10),
+                "useHTML5Audio" : true,
+                "url"           : url
+            });
+            sound.play();
+        });
+    });
+    </script>
+
+</body>
+</html>
